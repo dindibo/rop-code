@@ -65,6 +65,6 @@ pre.initialize_variable('x', 5)
 pre.initialize_variable('y', 10)
 pre.initialize_variable('add', 7)
 
-ADDITION(pre, 'x', 'y')
+ADDITION(pre, 'x', 'add')
 
 finalize()
