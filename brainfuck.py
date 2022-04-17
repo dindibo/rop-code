@@ -2,11 +2,10 @@
 
 from metaGadget import *
 import argparse
-import brainfuck
 
 EXEC_PATH = './simplecalc'
 
-my_parser = argparse.ArgumentParser(description='Compiles to rop-code binary')
+my_parser = argparse.ArgumentParser(description='Compiles to rop-code binary brainfuck flavor')
 
 my_parser.add_argument('Input',
                        metavar='input',
@@ -16,26 +15,47 @@ my_parser.add_argument('Input',
 args = my_parser.parse_args()
 input_path = args.Input
 
+class preprocessor:
+    
+    def qword_convert(self, ea_start, position):
+        return ea_start + position * 8
+
+    def __init__(self, ea_data) -> None:
+        self.ea_data    = ea_data
+        self.TEMP1      = self.qword_convert(self.ea_data, 0)
+        self.TEMP2      = self.qword_convert(self.ea_data, 1)
+        self.TRASH1     = self.qword_convert(self.ea_data, 2)
+        self.VAR_PTR    = self.qword_convert(self.ea_data, 3)
+        self.VAR_ARR    = self.qword_convert(self.ea_data, 4)
+
+    def get_currentFreeAddress(self, inc=False):
+        ret = self.currentFreeAddress
+        
+        if inc:
+            self.currentFreeAddress += 8
+
+        return ret
+
+    def start(self):
+        PRE_ASSIGNMENT(self.VAR_PTR, self.VAR_ARR)
+
 
 class compiler:
-    DATA_SIZE = 3
-
-    def __init__(self, preprocessor : brainfuck.preprocessor, ea_data) -> None:
+    def __init__(self, preprocessor : preprocessor, ea_data) -> None:
         self.preprocessor = preprocessor
         self.ea_data = ea_data
         self.tokens = '<>+-.,[]'
 
 
-    def get_data_addr(self, index):
-        return self.preprocessor.VAR_ARR + index * 8
-
-
     def do_ptr_move(self, direction):
-        MOVE_PTR(self.preprocessor, direction)
+        if direction:
+            read_toRAX(self.preprocessor.VAR_PTR)
+        else:
+            pass
 
 
     def do_ptr_value(self, positive):
-        ADD_PTR(self.preprocessor, positive)
+        pass
 
 
     def do_output(self):
@@ -74,23 +94,3 @@ class compiler:
         else:
             raise('Unkown token')
 
-    def exec_tokens(self, tokens):
-        assert all(x in self.tokens for x in tokens)
-        for token in tokens:
-            self.parse_token(token)
-
-    def init(self):
-        for x in range(self.DATA_SIZE):
-            PRE_ASSIGNMENT(self.get_data_addr(x), 0)
-
-pre = brainfuck.preprocessor(0x00000000006C1060)
-bf = compiler(pre, 0x00000000006C1060)
-
-pre.start()
-bf.init()
-
-brainfuck.marker()
-bf.exec_tokens('++++++++++>+++++++++>++++++++')
-brainfuck.marker()
-
-finalize()
