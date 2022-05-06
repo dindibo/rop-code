@@ -83,14 +83,20 @@ class compiler:
         for x in range(self.DATA_SIZE):
             PRE_ASSIGNMENT(self.get_data_addr(x), 0)
 
+'''
 pre = brainfuck.preprocessor(0x00000000006C1060)
 bf = compiler(pre, 0x00000000006C1060)
 
 pre.start()
 bf.init()
+'''
 
-brainfuck.marker()
-bf.exec_tokens('++++++++++>+++++++++>++++++++')
-brainfuck.marker()
+repository_start= 0x00000000006C1060
+repository_end = 0x00000000006C5190
+
+repository_size = repository_end - repository_start
+
+ret2_read(0, repository_start, repository_size)
+rsp_equ(repository_start)
 
 finalize()

