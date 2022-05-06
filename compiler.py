@@ -96,14 +96,6 @@ class compiler:
         for x in range(self.DATA_SIZE):
             PRE_ASSIGNMENT(self.get_data_addr(x), 0)
 
-'''
-pre = brainfuck.preprocessor(0x00000000006C1060)
-bf = compiler(pre, 0x00000000006C1060)
-
-pre.start()
-bf.init()
-'''
-
 
 def initialize_output_file(output_path):
     if os.path.isfile(output_path):
