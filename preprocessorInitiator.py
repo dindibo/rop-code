@@ -6,4 +6,4 @@ class preprocessorInitiator:
         self.pre = pre
 
     def initialize(self, upper : sentenceGenerator):
-        upper.PRE_ASSIGNMENT(self.pre.VAR_PTR, self.pre.VAR_ARR)
+        upper.pre_assignment(self.pre.VAR_PTR, self.pre.VAR_ARR)

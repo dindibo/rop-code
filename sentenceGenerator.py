@@ -7,13 +7,16 @@ class sentenceGenerator:
         self.intermediate = intermediate
         self.pre = pre
 
-    def PRE_ASSIGNMENT(self, addr, value):
+    def mark(self):
+        self.intermediate.marker()
+
+    def pre_assignment(self, addr, value):
         self.intermediate.write_what_where(addr, value)
 
 
     # 32 bit
     # TODO: Refactor
-    def ADDITION (self, lvar_name, rvar_name):
+    def addition (self, lvar_name, rvar_name):
         l_addr, r_addr = self.pre.variable_address(lvar_name), self.pre.variable_address(rvar_name)
 
         # Prepare lvar and rvar
@@ -34,7 +37,7 @@ class sentenceGenerator:
         self.intermediate.write_what_where_RAX(l_addr)
 
 
-    def MOVE_PTR(self, dir):
+    def move_ptr(self, dir):
         # Read to RAX variables ptr
         self.intermediate.read_toRAX(self.pre.VAR_PTR)
 
@@ -48,7 +51,7 @@ class sentenceGenerator:
 
     # 32 Bit
     # Side-Effect: Changes rbx
-    def ADD_PTR(self, positive):
+    def add_ptr(self, positive):
         # Read to RAX variables ptr
         self.intermediate.read_toRAX(self.pre.VAR_PTR)
 
@@ -71,5 +74,5 @@ class sentenceGenerator:
         self.intermediate.read_toRAX(self.pre.TEMP2)
         self.intermediate.ex_write_what_where()
 
-    def RETURN_TO_MAIN(self):
+    def return_to_main(self):
             self.intermediate.goto_main()

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from math import ceil
 from exploiterRaw import exploiterRaw
 from metaGadget import *
 import argparse
@@ -42,17 +43,19 @@ class compiler:
         self.tokens = '<>+-.,[]'
         self.upper = upper
 
+    def code_size(self):
+        return self.upper.intermediate.exp.numOfOps
 
     def get_data_addr(self, index):
         return self.preprocessor.VAR_ARR + index * 8
 
 
     def do_ptr_move(self, direction):
-        self.upper.MOVE_PTR(self.preprocessor, direction)
+        self.upper.move_ptr(direction)
 
 
     def do_ptr_value(self, positive):
-        self.upper.ADD_PTR(self.preprocessor, positive)
+        self.upper.add_ptr(positive)
 
 
     def do_output(self):
@@ -98,7 +101,7 @@ class compiler:
 
     def init(self):
         for x in range(self.DATA_SIZE):
-            self.upper.PRE_ASSIGNMENT(self.get_data_addr(x), 0)
+            self.upper.pre_assignment(self.get_data_addr(x), 0)
 
 
 def initialize_output_file(output_path):
@@ -144,6 +147,21 @@ bf.upper = upperTranslator
 preprocessorInitiator(pre).initialize(upperTranslator)
 bf.init()
 
-bf.upper.MOVE_PTR(True)
+# Main execution
+bf.upper.mark()
+bf.parse_token('>')
+bf.parse_token('+')
+bf.parse_token('<')
+bf.parse_token('-')
+bf.upper.mark()
 
 gen2.finalize()
+
+used,avail = 8 * (bf.code_size()), repository_size
+usedPerc = round((ceil(used) / avail) * 100, 2)
+
+print(f'Stage 1:    Complete')
+print('')
+
+print(f'Stage 2:    [ {used} / {avail} ]')
+print(f'            [ {usedPerc}% ] Usage')
