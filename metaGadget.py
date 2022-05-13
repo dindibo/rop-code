@@ -15,7 +15,7 @@ pop_rbp         = 0x0000000000419E7F # pop rbp ; ret
 main_addr       = 0x0000000000401383 # push rbp ; mov rbp, rsp
 mprotect_addr   = 0x0000000000435690 
 read_addr       = 0x0000000000434B20
-exit_addr       = 0x0000000000407A50
+exit_addr       = 0x0000000000434180
 nop_gadet       = 0x0000000000408B87
 
 class metaGadetGenerator:

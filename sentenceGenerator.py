@@ -7,6 +7,9 @@ class sentenceGenerator:
         self.intermediate = intermediate
         self.pre = pre
 
+    def exit_clean(self):
+        self.intermediate.ret2_exit(0)
+
     def mark(self):
         self.intermediate.marker()
 
