@@ -5,6 +5,7 @@ from exploiterRaw import exploiterRaw
 from metaGadget import *
 import argparse
 import os.path
+import sys
 from preprocessor import preprocessor
 from preprocessorInitiator import preprocessorInitiator
 
@@ -103,6 +104,10 @@ class compiler:
             self.upper.pre_assignment(self.get_data_addr(x), 0)
 
 
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+
 def initialize_output_file(output_path):
     if os.path.isfile(output_path):
         try:
@@ -159,8 +164,8 @@ gen2.finalize()
 used,avail = 8 * (bf.code_size()), repository_size
 usedPerc = round((ceil(used) / avail) * 100, 2)
 
-print(f'Stage 1:    Complete')
-print('')
+eprint(f'Stage 1:    Complete')
+eprint('')
 
-print(f'Stage 2:    [ {used} / {avail} ]')
-print(f'            [ {usedPerc}% ] Usage')
+eprint(f'Stage 2:    [ {used} / {avail} ]')
+eprint(f'            [ {usedPerc}% ] Usage')
