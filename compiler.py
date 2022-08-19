@@ -43,9 +43,17 @@ class compiler:
         self.preprocessor = preprocessor
         self.tokens = '<>+-.,[]'
         self.upper = upper
+        self.tokenOffsets = [ ]
 
     def code_size(self):
         return self.upper.intermediate.exp.numOfOps
+
+
+    def get_num_of_opcodes(self):
+        return self.upper.get_num_of_opcodes()
+
+    def token_add_wrapper(self):
+        self.tokenOffsets.append(self.get_num_of_opcodes())
 
     def get_data_addr(self, index):
         return self.preprocessor.VAR_ARR + index * 8
@@ -68,6 +76,8 @@ class compiler:
 
     def parse_token(self, token):
         assert token in self.tokens
+
+        self.token_add_wrapper()
 
         if token == '<':
             self.do_ptr_move(False)
@@ -170,3 +180,7 @@ eprint('')
 
 eprint(f'Stage 2:    [ {used} / {avail} ]')
 eprint(f'            [ {usedPerc}% ] Usage')
+
+dbg1=', '.join([str(x) for x in bf.tokenOffsets + [bf.upper.get_num_of_opcodes()] ])
+
+eprint(f'[DEBUG] {dbg1}')

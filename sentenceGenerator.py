@@ -7,6 +7,9 @@ class sentenceGenerator:
         self.intermediate = intermediate
         self.pre = pre
 
+    def get_num_of_opcodes(self):
+        return self.intermediate.get_num_of_opcodes()
+
     def exit_clean(self):
         self.intermediate.ret2_exit(0)
 
