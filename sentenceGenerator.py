@@ -80,5 +80,36 @@ class sentenceGenerator:
         self.intermediate.read_toRAX(self.pre.TEMP2)
         self.intermediate.ex_write_what_where()
 
+    # Performs check on current  data cell
+    # and if not 0 jumps back to loopStart
+    # otherwise, continues to  next gadget
+    def loop_end(self, loopStartOffset):
+        # Check if data zero and Yield binary answer
+        self.intermediate.rax_equ(self.pre.VAR_PTR)
+        self.intermediate.follow_rax_rax()
+        self.intermediate.follow_rax_rax()
+        self.intermediate.test_rax_rax()
+
+        # Prepare binary
+        self.intermediate.rax_equ(1)
+        self.intermediate.rdx_equ(0)
+
+        # Do compare
+        self.intermediate.cond_mov_rax_rdx()
+
+        # Extract bool to ESI
+        self.intermediate.edx_equ_eax()
+        self.intermediate.esi_equ_edx()
+    
+        # Move offset to edx
+        self.intermediate.rdx_equ(loopStartOffset)
+        self.intermediate.signed_multiply_esi_edx()
+
+        # Add calculate next offset
+        self.intermediate.eax_equ_esp()
+        self.intermediate.add_eax_esi()
+        self.intermediate.exchange_eax_esp()
+
+
     def return_to_main(self):
-            self.intermediate.goto_main()
+        self.intermediate.goto_main()

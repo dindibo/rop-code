@@ -44,6 +44,7 @@ class compiler:
         self.tokens = '<>+-.,[]'
         self.upper = upper
         self.tokenOffsets = [ ]
+        self.lastBracket = -1
 
     def code_size(self):
         return self.upper.intermediate.exp.numOfOps
@@ -74,6 +75,24 @@ class compiler:
     def do_input(self):
         pass
 
+    def do_bracket_start(self):
+        if self.lastBracket == 1:
+            raise 'loop depth more than 1 is not supported'
+        else:
+            self.lastBracket = self.tokenOffsets[-1]
+
+    def do_bracket_end(self):
+        offset = None
+
+        if self.lastBracket == -1:
+            raise 'Syntax error'
+        else:
+            # Multiply by 8 (64 bit)
+            offset = 640 + self.lastBracket * (-8)
+            print(f'[DEBUG] jump-offset --> {offset}')
+            self.upper.loop_end(offset)
+            
+
     def parse_token(self, token):
         assert token in self.tokens
 
@@ -98,10 +117,10 @@ class compiler:
             self.do_input()
 
         elif token == '[':
-            pass
+            self.do_bracket_start()
 
         elif token == ']':
-            pass
+            self.do_bracket_end()
         else:
             raise('Unkown token')
 
@@ -163,10 +182,13 @@ bf.init()
 # Main execution
 bf.upper.mark()
 bf.parse_token('+')
-bf.parse_token('>')
 bf.parse_token('+')
 bf.parse_token('+')
 bf.upper.mark()
+bf.parse_token('[')
+bf.parse_token('-')
+bf.upper.mark()
+bf.parse_token(']')
 
 bf.upper.exit_clean()
 
