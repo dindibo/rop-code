@@ -2,4 +2,10 @@ __pycache__/*
 __pycache__
 idaserver
 simplecalc
-test
+test*
+old/*
+old
+server
+.vscode/*
+.vscode
+rets
