@@ -76,6 +76,7 @@ class compiler:
         pass
 
     def do_bracket_start(self):
+        # FIXME: It's supposed to check the bracket count and not the bracket offset, this probably will never work.
         if self.lastBracket == 1:
             raise 'loop depth more than 1 is not supported'
         else:
@@ -89,6 +90,10 @@ class compiler:
         else:
             # Multiply by 8 (64 bit)
             offset = 640 + self.lastBracket * (-8)
+
+            # Fix offset because of double ret?
+            offset -= 16
+
             print(f'[DEBUG] jump-offset --> {offset}')
             self.upper.loop_end(offset)
             
@@ -189,6 +194,7 @@ bf.parse_token('[')
 bf.parse_token('-')
 bf.upper.mark()
 bf.parse_token(']')
+bf.upper.mark()
 
 bf.upper.exit_clean()
 

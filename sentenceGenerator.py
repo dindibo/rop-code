@@ -108,6 +108,11 @@ class sentenceGenerator:
         # Add calculate next offset
         self.intermediate.eax_equ_esp()
         self.intermediate.add_eax_esi()
+
+        # TODO: Add to EAX CORRECT_OFFSET (== 24 bytes)
+        
+
+        # Do exchange
         self.intermediate.exchange_eax_esp()
 
 
