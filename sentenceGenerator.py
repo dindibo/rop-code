@@ -109,8 +109,9 @@ class sentenceGenerator:
         self.intermediate.eax_equ_esp()
         self.intermediate.add_eax_esi()
 
-        # TODO: Add to EAX CORRECT_OFFSET (== 24 bytes)
-        
+        # Add independent offset,
+        # to be added both in taken and not taken loop condition
+        self.intermediate.add_rax_n(0x30)        
 
         # Do exchange
         self.intermediate.exchange_eax_esp()

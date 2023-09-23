@@ -91,10 +91,9 @@ class compiler:
             # Multiply by 8 (64 bit)
             offset = 640 + self.lastBracket * (-8)
 
-            # Fix offset because of double ret?
-            offset -= 16
+            # Fix offset because of excess ret
+            offset -= 0x40
 
-            print(f'[DEBUG] jump-offset --> {offset}')
             self.upper.loop_end(offset)
             
 
@@ -210,5 +209,3 @@ eprint(f'Stage 2:    [ {used} / {avail} ]')
 eprint(f'            [ {usedPerc}% ] Usage')
 
 dbg1=', '.join([str(x) for x in bf.tokenOffsets + [bf.upper.get_num_of_opcodes()] ])
-
-eprint(f'[DEBUG] {dbg1}')

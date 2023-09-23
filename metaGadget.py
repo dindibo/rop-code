@@ -29,6 +29,8 @@ pop_rcx         = 0x00000000004b8f17
 mov_edx_eax     = 0x000000000473C32 # edx, eax ; sub edx, ecx ; mov eax, edx ; ret
 pop_rdx         = 0x0000000004560B4
 add_eax_esi     = 0x0000000000464921
+add_rax_3       = 0x0000000000463ba0
+add_rax_rcx_g   = 0x00000000004232E0
 
 class metaGadetGenerator:
     def __init__(self, exp : exploiterTemplate) -> None:
@@ -94,6 +96,12 @@ class metaGadetGenerator:
         self.add_rax_3()
         self.add_rax_2()
 
+    def add_rax_rcx(self):
+        self.exp.add_gadet(add_rax_rcx_g)
+
+    def add_rax_n(self, n):
+        self.rcx_equ(n)
+        self.add_rax_rcx()
 
     def mov_rcx_rax(self, pre):
         self.ex_write_what_where(rsi_where=pre.TEMP1)

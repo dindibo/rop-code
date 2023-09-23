@@ -4,7 +4,6 @@ class preprocessor:
     
     def __init__(self, ea_data) -> None:
         self.ea_data    = ea_data
-        print(hex(self.ea_data))
 
         self.TEMP1      = self.qword_convert(self.ea_data, 0)
         self.TEMP2      = self.qword_convert(self.ea_data, 1)
