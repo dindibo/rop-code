@@ -41,7 +41,7 @@ class compiler:
 
     def __init__(self, preprocessor : preprocessor, upper : sentenceGenerator = None) -> None:
         self.preprocessor = preprocessor
-        self.tokens = '<>+-.,[]'
+        self.tokens = '<>+-.,[]?'
         self.upper = upper
         self.tokenOffsets = [ ]
         self.lastBracket = -1
@@ -107,6 +107,9 @@ class compiler:
 
         elif token == '>':
             self.do_ptr_move(True)
+            
+        elif token == '?':
+            self.upper.mark()
 
         elif token == '+':
             self.do_ptr_value(True)
@@ -150,6 +153,14 @@ def initialize_output_file(output_path):
             print('Failure')
 
 
+def preprocess_source_file(data):
+    clean_chars = '\n\r'
+
+    data = [x for x in data if not x in clean_chars]
+
+    return data
+
+
 if output_path != '':
     initialize_output_file(output_path)
 
@@ -184,16 +195,18 @@ preprocessorInitiator(pre).initialize(upperTranslator)
 bf.init()
 
 # Main execution
-bf.upper.mark()
-bf.parse_token('+')
-bf.parse_token('+')
-bf.parse_token('+')
-bf.upper.mark()
-bf.parse_token('[')
-bf.parse_token('-')
-bf.upper.mark()
-bf.parse_token(']')
-bf.upper.mark()
+
+file_data = ''
+
+with open(args.Input, 'r') as f:
+    file_data = f.read()
+
+# PreProcess data
+file_data = preprocess_source_file(file_data)
+
+# Compile code
+for x in file_data:
+    bf.parse_token(x)
 
 bf.upper.exit_clean()
 
